@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int            @id @default(autoincrement())
+  email             String         @unique
+  password          String
+  name              String
+  isAdmin           Boolean        @default(false)
+  role              String         @default("user") // user, moderator, admin
+  favorites         Favorite[]
+  comments          Comment[]
+  ratings           Rating[]
+  commentLikes      CommentLike[]
+  followers         Follow[]       @relation("Following")
+  followings        Follow[]       @relation("Follower")
+  profileImage      String?
+  notifications     Notification[]
+  sentNotifications Notification[] @relation("NotificationSender")
+  reports           Report[]
+  createdAt         DateTime       @default(now())
+  theme             String         @default("light")
+  watchlist         Watchlist[]
+}
+
+model Anime {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String
+  coverImage  String?
+  year        Int?
+  genres      Genre[]     @relation("AnimeGenres")
+  seasons     Season[]
+  favorites   Favorite[]
+  comments    Comment[]
+  ratings     Rating[]
+  createdAt   DateTime    @default(now())
+  watchlists  Watchlist[]
+}
+
+model Season {
+  id        Int       @id @default(autoincrement())
+  anime     Anime     @relation(fields: [animeId], references: [id])
+  animeId   Int
+  number    Int
+  year      Int?
+  episodes  Episode[]
+  createdAt DateTime  @default(now())
+}
+
+model Episode {
+  id          Int       @id @default(autoincrement())
+  season      Season    @relation(fields: [seasonId], references: [id])
+  seasonId    Int
+  number      Int
+  title       String
+  description String?
+  airDate     DateTime?
+  videoUrl    String?
+  comments    Comment[]
+  createdAt   DateTime  @default(now())
+}
+
+model Genre {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  animes Anime[] @relation("AnimeGenres")
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id])
+  animeId   Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, animeId])
+}
+
+model Comment {
+  id        Int           @id @default(autoincrement())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    Int
+  anime     Anime?        @relation(fields: [animeId], references: [id])
+  animeId   Int?
+  episode   Episode?      @relation(fields: [episodeId], references: [id])
+  episodeId Int?
+  content   String
+  likes     CommentLike[]
+  createdAt DateTime      @default(now())
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  commentId Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, commentId])
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id])
+  animeId   Int
+  value     Int // 1-10 arası puan
+  createdAt DateTime @default(now())
+
+  @@unique([userId, animeId])
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  follower    User     @relation("Follower", fields: [followerId], references: [id])
+  followerId  Int
+  following   User     @relation("Following", fields: [followingId], references: [id])
+  followingId Int
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  sender    User?    @relation("NotificationSender", fields: [senderId], references: [id])
+  senderId  Int?
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id         Int      @id @default(autoincrement())
+  reporter   User     @relation(fields: [reporterId], references: [id])
+  reporterId Int
+  targetType String // 'comment', 'anime', 'user'
+  targetId   Int
+  reason     String
+  status     String   @default("pending") // pending, resolved, rejected
+  createdAt  DateTime @default(now())
+}
+
+model Watchlist {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id])
+  animeId   Int
+  status    String   @default("plan") // plan, watching, completed
+  createdAt DateTime @default(now())
+
+  @@unique([userId, animeId])
+}

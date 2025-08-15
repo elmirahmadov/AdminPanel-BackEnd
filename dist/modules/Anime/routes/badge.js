@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const badgeController_1 = require("../controllers/badgeController");
+const authMiddleware_1 = require("../../../common/middlewares/authMiddleware");
+const isAdmin_1 = require("../../../common/middlewares/isAdmin");
+const router = (0, express_1.Router)();
+router.get("/", badgeController_1.getAllBadges);
+router.get("/:id", badgeController_1.getBadgeById);
+router.post("/", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), badgeController_1.createBadge);
+router.put("/:id", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), badgeController_1.updateBadge);
+router.delete("/:id", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), badgeController_1.deleteBadge);
+router.get("/user/:userId", badgeController_1.getUserBadges);
+router.post("/award", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), badgeController_1.awardBadge);
+router.delete("/award", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), badgeController_1.removeBadge);
+router.get("/stats", badgeController_1.getBadgeStats);
+exports.default = router;

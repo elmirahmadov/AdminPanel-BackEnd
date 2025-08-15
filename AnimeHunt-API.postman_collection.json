@@ -1,0 +1,1090 @@
+{
+  "info": {
+    "name": "AnimeHunt API",
+    "description": "AnimeHunt projesi için tüm kullanıcı ve admin API'leri, klasörlü ve açıklamalı şekilde. Tüm endpointler JWT ile korunur. {{baseUrl}} ve {{token}} dinamik değişken olarak kullanılabilir.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Kayıt Ol",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": {\n    \"name\": \"string // Gerekli\",\n    \"email\": \"string // Gerekli\",\n    \"password\": \"string // Gerekli\",\n    \"username\": \"string // Gerekli\",\n    \"birthDate\": \"string // Opsiyonel (YYYY-MM-DD)\",\n    \"gender\": \"string // Opsiyonel (MALE/FEMALE/OTHER)\",\n    \"bio\": \"string // Opsiyonel\"\n  },\n  \"example\": {\n    \"name\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"123456\",\n    \"username\": \"testuser123\",\n    \"birthDate\": \"2000-01-01\",\n    \"gender\": \"MALE\",\n    \"bio\": \"Anime sever\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Giriş Yap",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": {\n    \"email\": \"string // Gerekli\",\n    \"password\": \"string // Gerekli\"\n  },\n  \"example\": {\n    \"email\": \"test@example.com\",\n    \"password\": \"123456\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kullanıcı",
+      "item": [
+        {
+          "name": "Profilimi Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "me"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": {\n    \"name\": \"string // Opsiyonel\",\n    \"username\": \"string // Opsiyonel\",\n    \"bio\": \"string // Opsiyonel\",\n    \"birthDate\": \"string // Opsiyonel (YYYY-MM-DD)\",\n    \"gender\": \"string // Opsiyonel (MALE/FEMALE/OTHER)\",\n    \"theme\": \"string // Opsiyonel (LIGHT/DARK)\"\n  },\n  \"example\": {\n    \"name\": \"yeniad\",\n    \"username\": \"yenikullanici\",\n    \"bio\": \"Yeni biyografi\",\n    \"birthDate\": \"1999-05-10\",\n    \"gender\": \"FEMALE\",\n    \"theme\": \"DARK\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Anime",
+      "item": [
+        {
+          "name": "Tüm Animeleri Getir",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/anime",
+              "host": ["{{baseUrl}}"],
+              "path": ["anime"]
+            }
+          }
+        },
+        {
+          "name": "Anime Detay (ID ile)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/anime/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["anime", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Anime Arama/Filtreleme",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/anime/search?q=naruto&type=TV&status=ONGOING&page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["anime", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "naruto",
+                  "description": "Arama kelimesi (opsiyonel)"
+                },
+                {
+                  "key": "type",
+                  "value": "TV",
+                  "description": "Tür (opsiyonel)"
+                },
+                {
+                  "key": "status",
+                  "value": "ONGOING",
+                  "description": "Durum (opsiyonel)"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Sayfa (opsiyonel)"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Sayfa boyutu (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Anime Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/anime",
+              "host": ["{{baseUrl}}"],
+              "path": ["anime"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"title\": \"string // Gerekli\",\n  \"slug\": \"string // Gerekli (benzersiz)\",\n  \"type\": \"string // Gerekli (TV/MOVIE/OVA/ONA/SPECIAL)\",\n  \"status\": \"string // Gerekli (ONGOING/COMPLETED/UPCOMING)\",\n  \"createdById\": \"number // Gerekli (admin id)\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"releaseYear\": \"number // Opsiyonel\",\n  \"imageUrl\": \"string // Opsiyonel\",\n  \"bannerUrl\": \"string // Opsiyonel\",\n  \"studios\": \"string[] // Opsiyonel\",\n  \"trailerUrl\": \"string // Opsiyonel\",\n  \"approvedById\": \"number // Opsiyonel (admin id)\",\n  \"categoryIds\": \"number[] // Opsiyonel\",\n  \"tagIds\": \"number[] // Opsiyonel\",\n  \"gallery\": \"object[] // Opsiyonel [{imageUrl, description, order}]\",\n  \"externalLinks\": \"object[] // Opsiyonel [{type, url}]\",\n  \"sources\": \"object[] // Opsiyonel [{type, url}]\",\n  \"relatedAnimeIds\": \"number[] // Opsiyonel\",\n  \"translationInputs\": \"object[] // Opsiyonel [{language, title}]\"\n},\n\n\"example\": {\n  \"title\": \"Naruto\",\n  \"slug\": \"naruto\",\n  \"type\": \"TV\",\n  \"status\": \"ONGOING\",\n  \"createdById\": 1,\n  \"description\": \"Ninja hikayesi\",\n  \"releaseYear\": 2002,\n  \"imageUrl\": \"https://cdn.example.com/anime/naruto.jpg\",\n  \"bannerUrl\": \"https://cdn.example.com/anime/naruto-banner.jpg\",\n  \"studios\": [\"Pierrot\"],\n  \"trailerUrl\": \"https://youtube.com/trailer\",\n  \"approvedById\": 2,\n  \"categoryIds\": [1,2],\n  \"tagIds\": [3,4],\n  \"gallery\": [{\"imageUrl\": \"https://cdn.example.com/anime/naruto-1.jpg\", \"description\": \"Aksiyon sahnesi\", \"order\": 1}],\n  \"externalLinks\": [{\"type\": \"OFFICIAL\", \"url\": \"https://naruto.com\"}],\n  \"sources\": [{\"type\": \"CRUNCHYROLL\", \"url\": \"https://crunchyroll.com/naruto\"}],\n  \"relatedAnimeIds\": [5,6],\n  \"translationInputs\": [{\"language\": \"EN\", \"title\": \"Naruto\"}]\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Anime Güncelle (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/anime/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["anime", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"title\": \"string // Gerekli\",\n  \"slug\": \"string // Gerekli (benzersiz)\",\n  \"type\": \"string // Gerekli (TV/MOVIE/OVA/ONA/SPECIAL)\",\n  \"status\": \"string // Gerekli (ONGOING/COMPLETED/UPCOMING)\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"releaseYear\": \"number // Opsiyonel\",\n  \"imageUrl\": \"string // Opsiyonel\",\n  \"bannerUrl\": \"string // Opsiyonel\",\n  \"studios\": \"string[] // Opsiyonel\",\n  \"trailerUrl\": \"string // Opsiyonel\",\n  \"approvedById\": \"number // Opsiyonel (admin id)\",\n  \"categoryIds\": \"number[] // Opsiyonel\",\n  \"tagIds\": \"number[] // Opsiyonel\",\n  // gallery, externalLinks, sources, relatedAnimes, translations güncellemeleri için ayrı endpoint önerilir\n},\n\n\"example\": {\n  \"title\": \"Naruto Shippuden\",\n  \"slug\": \"naruto-shippuden\",\n  \"type\": \"TV\",\n  \"status\": \"COMPLETED\",\n  \"description\": \"Naruto'nun devamı\",\n  \"releaseYear\": 2007,\n  \"imageUrl\": \"https://cdn.example.com/anime/naruto-shippuden.jpg\",\n  \"bannerUrl\": \"https://cdn.example.com/anime/naruto-shippuden-banner.jpg\",\n  \"studios\": [\"Pierrot\"],\n  \"trailerUrl\": \"https://youtube.com/trailer2\",\n  \"approvedById\": 2,\n  \"categoryIds\": [1,2],\n  \"tagIds\": [3,4]\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Anime Sil (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/anime/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["anime", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favori",
+      "item": [
+        {
+          "name": "Favori Ekle",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favorite",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorite"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": {\n    \"userId\": \"number // Gerekli (JWT ile alınmıyorsa)\",\n    \"animeId\": \"number // Opsiyonel (anime favorilemek için)\",\n    \"characterId\": \"number // Opsiyonel (karakter favorilemek için)\"\n  },\n  \"example\": {\n    \"userId\": 1,\n    \"animeId\": 1\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Karakteri Favorile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favorite",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorite"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": {\n    \"userId\": \"number // Gerekli (JWT ile alınmıyorsa)\",\n    \"animeId\": \"number // Opsiyonel\",\n    \"characterId\": \"number // Opsiyonel\"\n  },\n  \"example\": {\n    \"userId\": 1,\n    \"characterId\": 5\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Yorum",
+      "item": [
+        {
+          "name": "Tüm Yorumları Getir",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/comment",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment"]
+            }
+          }
+        },
+        {
+          "name": "Anime Yorumları",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/comment/anime/:animeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment", "anime", ":animeId"]
+            }
+          }
+        },
+        {
+          "name": "Bölüm Yorumları",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/comment/episode/:episodeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment", "episode", ":episodeId"]
+            }
+          }
+        },
+        {
+          "name": "Yorum Detay (ID ile)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/comment/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Yorum Ekle",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comment",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"userId\": \"number // Gerekli (JWT ile alınmıyorsa)\",\n  \"content\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"animeId\": \"number // Opsiyonel\",\n  \"seasonId\": \"number // Opsiyonel\",\n  \"episodeId\": \"number // Opsiyonel\",\n  \"parentId\": \"number // Opsiyonel (cevap ise)\",\n  \"isSpoiler\": \"boolean // Opsiyonel\"\n},\n\n\"example\": {\n  \"userId\": 1,\n  \"animeId\": 1,\n  \"seasonId\": null,\n  \"episodeId\": null,\n  \"content\": \"Çok iyi anime!\",\n  \"parentId\": null,\n  \"isSpoiler\": false\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Yorum Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comment/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"content\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"isSpoiler\": \"boolean // Opsiyonel\"\n},\n\n\"example\": {\n  \"content\": \"Çok iyi anime! (güncellenmiş)\",\n  \"isSpoiler\": false\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Yorum Sil",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/comment/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Yorum Raporla",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comment/report",
+              "host": ["{{baseUrl}}"],
+              "path": ["comment", "report"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"userId\": \"number // Gerekli\",\n  \"commentId\": \"number // Gerekli\",\n  \"reason\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"details\": \"string // Opsiyonel\"\n},\n\n\"example\": {\n  \"userId\": 1,\n  \"commentId\": 5,\n  \"reason\": \"Spam\",\n  \"details\": \"Gereksiz spam yorumu\"\n}\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Forum",
+      "item": [
+        {
+          "name": "Tüm Kategorileri Getir",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/forum/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Kategori Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/forum/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "categories"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"name\": \"string // Gerekli\",\n  \"slug\": \"string // Gerekli (benzersiz)\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"parentId\": \"number // Opsiyonel (alt kategori için)\",\n  \"imageUrl\": \"string // Opsiyonel\",\n  \"order\": \"number // Opsiyonel\"\n},\n\n\"example\": {\n  \"name\": \"Genel Tartışma\",\n  \"slug\": \"genel-tartisma\",\n  \"description\": \"Genel anime tartışmaları\",\n  \"imageUrl\": \"https://cdn.example.com/categories/general.jpg\",\n  \"order\": 1\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Kategori Güncelle (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/forum/categories/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "categories", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"name\": \"string // Gerekli\",\n  \"slug\": \"string // Gerekli (benzersiz)\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"parentId\": \"number // Opsiyonel (alt kategori için)\",\n  \"imageUrl\": \"string // Opsiyonel\",\n  \"order\": \"number // Opsiyonel\"\n},\n\n\"example\": {\n  \"name\": \"Genel Tartışma (Güncellenmiş)\",\n  \"slug\": \"genel-tartisma-guncellenmis\",\n  \"description\": \"Genel anime tartışmaları - güncellenmiş\",\n  \"imageUrl\": \"https://cdn.example.com/categories/general-updated.jpg\",\n  \"order\": 1\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Kategori Sil (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/forum/categories/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "categories", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Kategori Konuları",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/forum/categories/:categoryId/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "categories", ":categoryId", "topics"]
+            }
+          }
+        },
+        {
+          "name": "Konu Aç",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/forum/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "topics"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"userId\": \"number // Gerekli (JWT ile alınmıyorsa)\",\n  \"categoryId\": \"number // Gerekli\",\n  \"title\": \"string // Gerekli\",\n  \"content\": \"string // Gerekli (ilk post)\",\n\n  // Opsiyonel alanlar\n  \"isPinned\": \"boolean // Opsiyonel\",\n  \"isLocked\": \"boolean // Opsiyonel\"\n},\n\n\"example\": {\n  \"userId\": 1,\n  \"categoryId\": 1,\n  \"title\": \"En iyi anime nedir?\",\n  \"content\": \"Sizce en iyi anime hangisi?\",\n  \"isPinned\": false,\n  \"isLocked\": false\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Konu Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/forum/topics/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "topics", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"title\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"isPinned\": \"boolean // Opsiyonel\",\n  \"isLocked\": \"boolean // Opsiyonel\"\n},\n\n\"example\": {\n  \"title\": \"En iyi anime nedir? (Güncellenmiş)\",\n  \"isPinned\": true,\n  \"isLocked\": false\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Konu Sil",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/forum/topics/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "topics", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Konu Mesajları",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/forum/topics/:topicId/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "topics", ":topicId", "posts"]
+            }
+          }
+        },
+        {
+          "name": "Mesaj Ekle",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/forum/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "posts"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"userId\": \"number // Gerekli (JWT ile alınmıyorsa)\",\n  \"topicId\": \"number // Gerekli\",\n  \"content\": \"string // Gerekli\"\n},\n\n\"example\": {\n  \"userId\": 1,\n  \"topicId\": 1,\n  \"content\": \"Bence Naruto en iyi anime!\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Mesaj Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/forum/posts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "posts", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"content\": \"string // Gerekli\"\n},\n\n\"example\": {\n  \"content\": \"Bence Naruto en iyi anime! (güncellenmiş)\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Mesaj Sil",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/forum/posts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "posts", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Forum Arama",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/forum/search?q=naruto",
+              "host": ["{{baseUrl}}"],
+              "path": ["forum", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "naruto",
+                  "description": "Arama kelimesi (opsiyonel)"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rozet & Görev",
+      "item": [
+        {
+          "name": "Rozet Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/badge",
+              "host": ["{{baseUrl}}"],
+              "path": ["badge"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": {\n    \"name\": \"string // Gerekli\",\n    \"description\": \"string // Gerekli\",\n    \"icon\": \"string // Gerekli\",\n    \"color\": \"string // Opsiyonel\",\n    \"order\": \"number // Opsiyonel\",\n    \"isActive\": \"boolean // Opsiyonel\",\n    \"type\": \"string // Opsiyonel (ACHIEVEMENT/...)\",\n    \"requirement\": \"number // Opsiyonel\"\n  },\n  \"example\": {\n    \"name\": \"Favori Ustası\",\n    \"description\": \"10 animeyi favoriye ekledin!\",\n    \"icon\": \"https://cdn.example.com/badges/favori-ustasi.png\",\n    \"color\": \"#FFD700\",\n    \"order\": 1,\n    \"isActive\": true,\n    \"type\": \"ACHIEVEMENT\",\n    \"requirement\": 10\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Görev Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/task",
+              "host": ["{{baseUrl}}"],
+              "path": ["task"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": {\n    \"name\": \"string // Gerekli\",\n    \"description\": \"string // Gerekli\",\n    \"type\": \"string // Gerekli (FAVORITE_COUNT/...)\",\n    \"threshold\": \"number // Gerekli\",\n    \"badgeId\": \"number // Gerekli\",\n    \"order\": \"number // Opsiyonel\",\n    \"isActive\": \"boolean // Opsiyonel\",\n    \"isRepeatable\": \"boolean // Opsiyonel\"\n  },\n  \"example\": {\n    \"name\": \"10 Favori\",\n    \"description\": \"10 animeyi favoriye ekle.\",\n    \"type\": \"FAVORITE_COUNT\",\n    \"threshold\": 10,\n    \"badgeId\": 1,\n    \"order\": 1,\n    \"isActive\": true,\n    \"isRepeatable\": false\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tür (Genre)",
+      "item": [
+        {
+          "name": "Tüm Türleri Getir",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/genre",
+              "host": ["{{baseUrl}}"],
+              "path": ["genre"]
+            }
+          }
+        },
+        {
+          "name": "Tür Detay (ID ile)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/genre/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["genre", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Tür Arama",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/genre/search?q=aksiyon&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["genre", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "aksiyon",
+                  "description": "Arama kelimesi (opsiyonel)"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Sayfa (opsiyonel)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Limit (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tür İstatistikleri",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/genre/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["genre", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Tür Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/genre",
+              "host": ["{{baseUrl}}"],
+              "path": ["genre"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"name\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"color\": \"string // Opsiyonel\"\n},\n\n\"example\": {\n  \"name\": \"Aksiyon\",\n  \"description\": \"Aksiyon dolu animeler\",\n  \"color\": \"#FF0000\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Tür Güncelle (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/genre/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["genre", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"name\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"color\": \"string // Opsiyonel\"\n},\n\n\"example\": {\n  \"name\": \"Aksiyon & Macera\",\n  \"description\": \"Aksiyon ve macera dolu animeler\",\n  \"color\": \"#FF6600\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Tür Sil (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/genre/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["genre", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sezon (Season)",
+      "item": [
+        {
+          "name": "Tüm Sezonları Getir",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/season",
+              "host": ["{{baseUrl}}"],
+              "path": ["season"]
+            }
+          }
+        },
+        {
+          "name": "Anime Sezonları",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/season/anime/:animeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["season", "anime", ":animeId"]
+            }
+          }
+        },
+        {
+          "name": "Sezon Detay (ID ile)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/season/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["season", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Sezon Arama",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/season/search?q=sezon1&animeId=1&status=ONGOING&minYear=2020&maxYear=2024&minSeasonNumber=1&maxSeasonNumber=5&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["season", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "sezon1",
+                  "description": "Arama kelimesi (opsiyonel)"
+                },
+                {
+                  "key": "animeId",
+                  "value": "1",
+                  "description": "Anime ID (opsiyonel)"
+                },
+                {
+                  "key": "status",
+                  "value": "ONGOING",
+                  "description": "Durum (opsiyonel)"
+                },
+                {
+                  "key": "minYear",
+                  "value": "2020",
+                  "description": "Minimum yıl (opsiyonel)"
+                },
+                {
+                  "key": "maxYear",
+                  "value": "2024",
+                  "description": "Maksimum yıl (opsiyonel)"
+                },
+                {
+                  "key": "minSeasonNumber",
+                  "value": "1",
+                  "description": "Minimum sezon numarası (opsiyonel)"
+                },
+                {
+                  "key": "maxSeasonNumber",
+                  "value": "5",
+                  "description": "Maksimum sezon numarası (opsiyonel)"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Sayfa (opsiyonel)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Limit (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sezon İstatistikleri",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/season/stats?animeId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["season", "stats"],
+              "query": [
+                {
+                  "key": "animeId",
+                  "value": "1",
+                  "description": "Anime ID (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sezon Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/season",
+              "host": ["{{baseUrl}}"],
+              "path": ["season"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"animeId\": \"number // Gerekli\",\n  \"title\": \"string // Gerekli\",\n  \"seasonNumber\": \"number // Gerekli\",\n  \"status\": \"string // Gerekli (ONGOING/COMPLETED/UPCOMING)\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"year\": \"number // Opsiyonel\",\n  \"coverImage\": \"string // Opsiyonel\"\n},\n\n\"example\": {\n  \"animeId\": 1,\n  \"title\": \"Naruto Sezon 1\",\n  \"seasonNumber\": 1,\n  \"status\": \"ONGOING\",\n  \"description\": \"Naruto'nun ilk sezonu\",\n  \"year\": 2002,\n  \"coverImage\": \"https://cdn.example.com/season/naruto-s1.jpg\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Sezon Güncelle (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/season/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["season", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"title\": \"string // Gerekli\",\n  \"seasonNumber\": \"number // Gerekli\",\n  \"status\": \"string // Gerekli (ONGOING/COMPLETED/UPCOMING)\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"year\": \"number // Opsiyonel\",\n  \"coverImage\": \"string // Opsiyonel\"\n},\n\n\"example\": {\n  \"title\": \"Naruto Sezon 1 (Güncellenmiş)\",\n  \"seasonNumber\": 1,\n  \"status\": \"COMPLETED\",\n  \"description\": \"Naruto'nun ilk sezonu - tamamlandı\",\n  \"year\": 2002,\n  \"coverImage\": \"https://cdn.example.com/season/naruto-s1-updated.jpg\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Sezon Sil (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/season/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["season", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bölüm (Episode)",
+      "item": [
+        {
+          "name": "Tüm Bölümleri Getir",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/episode",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode"]
+            }
+          }
+        },
+        {
+          "name": "Sezon Bölümleri",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/episode/season/:seasonId",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode", "season", ":seasonId"]
+            }
+          }
+        },
+        {
+          "name": "Bölüm Detay (ID ile)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/episode/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Bölüm Arama",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/episode/search?q=bölüm1&seasonId=1&animeId=1&minDuration=20&maxDuration=30&minEpisodeNumber=1&maxEpisodeNumber=10&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "bölüm1",
+                  "description": "Arama kelimesi (opsiyonel)"
+                },
+                {
+                  "key": "seasonId",
+                  "value": "1",
+                  "description": "Sezon ID (opsiyonel)"
+                },
+                {
+                  "key": "animeId",
+                  "value": "1",
+                  "description": "Anime ID (opsiyonel)"
+                },
+                {
+                  "key": "minDuration",
+                  "value": "20",
+                  "description": "Minimum süre (opsiyonel)"
+                },
+                {
+                  "key": "maxDuration",
+                  "value": "30",
+                  "description": "Maksimum süre (opsiyonel)"
+                },
+                {
+                  "key": "minEpisodeNumber",
+                  "value": "1",
+                  "description": "Minimum bölüm numarası (opsiyonel)"
+                },
+                {
+                  "key": "maxEpisodeNumber",
+                  "value": "10",
+                  "description": "Maksimum bölüm numarası (opsiyonel)"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Sayfa (opsiyonel)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Limit (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bölüm İstatistikleri",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/episode/stats?seasonId=1&animeId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode", "stats"],
+              "query": [
+                {
+                  "key": "seasonId",
+                  "value": "1",
+                  "description": "Sezon ID (opsiyonel)"
+                },
+                {
+                  "key": "animeId",
+                  "value": "1",
+                  "description": "Anime ID (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bölüm Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/episode",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"seasonId\": \"number // Gerekli\",\n  \"title\": \"string // Gerekli\",\n  \"episodeNumber\": \"number // Gerekli\",\n  \"duration\": \"number // Gerekli (dakika)\",\n  \"videoUrl\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"thumbnailUrl\": \"string // Opsiyonel\",\n  \"releaseDate\": \"string // Opsiyonel (YYYY-MM-DD)\"\n},\n\n\"example\": {\n  \"seasonId\": 1,\n  \"title\": \"Naruto Bölüm 1\",\n  \"episodeNumber\": 1,\n  \"duration\": 25,\n  \"videoUrl\": \"https://cdn.example.com/videos/naruto-ep1.mp4\",\n  \"description\": \"Naruto'nun ilk bölümü\",\n  \"thumbnailUrl\": \"https://cdn.example.com/thumbnails/naruto-ep1.jpg\",\n  \"releaseDate\": \"2002-10-03\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Bölüm Güncelle (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/episode/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  // Gerekli alanlar\n  \"title\": \"string // Gerekli\",\n  \"episodeNumber\": \"number // Gerekli\",\n  \"duration\": \"number // Gerekli (dakika)\",\n  \"videoUrl\": \"string // Gerekli\",\n\n  // Opsiyonel alanlar\n  \"description\": \"string // Opsiyonel\",\n  \"thumbnailUrl\": \"string // Opsiyonel\",\n  \"releaseDate\": \"string // Opsiyonel (YYYY-MM-DD)\"\n},\n\n\"example\": {\n  \"title\": \"Naruto Bölüm 1 (Güncellenmiş)\",\n  \"episodeNumber\": 1,\n  \"duration\": 25,\n  \"videoUrl\": \"https://cdn.example.com/videos/naruto-ep1-updated.mp4\",\n  \"description\": \"Naruto'nun ilk bölümü - güncellenmiş\",\n  \"thumbnailUrl\": \"https://cdn.example.com/thumbnails/naruto-ep1-updated.jpg\",\n  \"releaseDate\": \"2002-10-03\"\n}\n}"
+            }
+          }
+        },
+        {
+          "name": "Bölüm Sil (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/episode/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["episode", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Dashboard İstatistikleri",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "stats"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

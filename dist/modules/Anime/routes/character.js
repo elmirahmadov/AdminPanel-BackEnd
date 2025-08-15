@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const characterController_1 = require("../controllers/characterController");
+const authMiddleware_1 = require("../../../common/middlewares/authMiddleware");
+const isAdmin_1 = require("../../../common/middlewares/isAdmin");
+const router = (0, express_1.Router)();
+router.get("/", characterController_1.getAllCharacters);
+router.get("/search", characterController_1.searchCharacters);
+router.get("/:id", characterController_1.getCharacterById);
+router.get("/anime/:animeId", characterController_1.getCharacterAnimes);
+router.post("/anime/:animeId/add/:characterId", characterController_1.addCharacterToAnime);
+router.delete("/anime/:animeId/remove/:characterId", characterController_1.removeCharacterFromAnime);
+router.post("/", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), characterController_1.createCharacter);
+router.put("/:id", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), characterController_1.updateCharacter);
+router.delete("/:id", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), characterController_1.deleteCharacter);
+exports.default = router;

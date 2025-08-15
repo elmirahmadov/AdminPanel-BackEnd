@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const episodeController_1 = require("../controllers/episodeController");
+const authMiddleware_1 = require("../../../common/middlewares/authMiddleware");
+const isAdmin_1 = require("../../../common/middlewares/isAdmin");
+const router = (0, express_1.Router)();
+router.get("/", episodeController_1.getAllEpisodes);
+router.get("/:id", episodeController_1.getEpisodeById);
+router.post("/season/:seasonId/anime/:animeId", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), episodeController_1.createEpisode);
+router.put("/:id", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), episodeController_1.updateEpisode);
+router.delete("/:id", authMiddleware_1.authenticateToken, (0, isAdmin_1.isRole)("ADMIN"), episodeController_1.deleteEpisode);
+exports.default = router;

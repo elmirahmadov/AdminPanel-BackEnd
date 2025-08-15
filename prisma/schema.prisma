@@ -1,0 +1,881 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+enum AnimeType {
+  TV
+  MOVIE
+  OVA
+  ONA
+  SPECIAL
+}
+
+enum AnimeStatus {
+  ONGOING
+  COMPLETED
+  UPCOMING
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+enum NotificationType {
+  SYSTEM
+  USER
+  ANIME
+  COMMENT
+  FORUM
+  TASK
+  BADGE
+}
+
+enum ReportType {
+  ANIME
+  COMMENT
+  USER
+  FORUM
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  REJECTED
+}
+
+enum TaskType {
+  DAILY
+  WEEKLY
+  SPECIAL
+}
+
+enum BadgeType {
+  SYSTEM
+  EVENT
+  SPECIAL
+}
+
+enum ActivityType {
+  COMMENT
+  FAVORITE
+  WATCH
+  LOGIN
+  RATING
+  FOLLOW
+}
+
+// Forum yeni enum'ları
+enum ForumPermission {
+  READ
+  WRITE
+  MODERATE
+  ADMIN
+}
+
+enum TopicStatus {
+  ACTIVE
+  MODERATED
+  DELETED
+  LOCKED
+}
+
+enum ReplyStatus {
+  ACTIVE
+  MODERATED
+  DELETED
+}
+
+enum ModerationAction {
+  APPROVE
+  REJECT
+  HIDE
+  DELETE
+  WARN
+  BAN
+}
+
+// --- USER ---
+model User {
+  id                   Int         @id @default(autoincrement())
+  username             String      @unique
+  email                String      @unique
+  password             String
+  role                 UserRole    @default(USER)
+  status               UserStatus  @default(ACTIVE)
+  profileImage         String?     @default("default-profile.png")
+  bio                  String?     @db.VarChar(500)
+  verified             Boolean     @default(false)
+  settings             Json?
+  twoFactorSecret      String?
+  lastLogin            DateTime?
+  passwordChangedAt    DateTime?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  // User Relations
+  followers    UserFollow[] @relation("UserFollows")
+  following    UserFollow[] @relation("UserFollowers")
+  activities   UserActivity[]
+  banHistory   UserBanHistory[]
+  bannedUsers  UserBanHistory[] @relation("BannedBy")
+  badges       UserBadge[]
+  tasks        UserTask[]
+
+  // Content Relations
+  createdAnimes    Anime[]   @relation("CreatedBy")
+  approvedAnimes   Anime[]   @relation("ApprovedBy")
+  favorites        Favorite[]
+  watchlist        Watchlist[]
+  ratings          Rating[]
+  comments         Comment[]
+  views            View[]
+  histories        AnimeHistory[]
+
+  // Forum Relations
+  forumTopics ForumTopic[]
+  forumPosts  ForumPost[]
+  forumRoles  ForumUserRole[]
+  forumActivities UserForumActivity[]
+
+  // Notification Relations
+  notifications         Notification[]
+  notificationSettings  NotificationSetting[]
+  sentNotifications     Notification[] @relation("NotificationSender")
+
+  // Report Relations
+  reports        Report[] @relation("ReportedBy")
+  handledReports Report[] @relation("HandledBy")
+  reportedUser   Report[] @relation("ReportedUser")
+
+  // Moderasyon Relations
+  moderatedComments Comment[] @relation("CommentModeratedBy")
+
+  @@index([email])
+  @@index([username])
+  @@index([status])
+  @@index([role])
+  @@index([createdAt])
+}
+
+// --- USER FOLLOW ---
+model UserFollow {
+  id          Int      @id @default(autoincrement())
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  Int
+  following   User     @relation("UserFollows", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId Int
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+// --- ANIME ---
+model Anime {
+  id           Int         @id @default(autoincrement())
+  title        String
+  slug         String      @unique
+  description  String?     @db.Text
+  releaseYear  Int?
+  type         AnimeType
+  status       AnimeStatus @default(ONGOING)
+  imageUrl     String?     @default("default-anime.jpg")
+  bannerUrl    String?
+  studios      String[]
+  trailerUrl   String?
+  rating       Float       @default(0)
+  ratingCount  Int         @default(0)
+  viewCount    Int         @default(0)
+  featured     Boolean     @default(false)
+  createdBy    User        @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById  Int
+  approvedBy   User?       @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedById Int?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  categories     Category[]        @relation("AnimeCategory")
+  tags           Tag[]             @relation("AnimeTags")
+  gallery        AnimeGallery[]
+  externalLinks  ExternalLink[]
+  sources        Source[]
+  relatedAnimes  RelatedAnime[]    @relation("MainAnime")
+  relatedTo      RelatedAnime[]    @relation("RelatedAnime")
+  comments       Comment[]
+  characters     Character[]
+  seasons        Season[]
+  episodes       Episode[]
+  ratings        Rating[]
+  favorites      Favorite[]
+  watchlist      Watchlist[]
+  views          View[]
+  histories      AnimeHistory[]
+  translations   AnimeTranslation[]
+  notifications  Notification[]
+  reports        Report[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([type])
+  @@index([featured])
+  @@index([rating])
+  @@index([viewCount])
+  @@index([createdAt])
+}
+
+// --- CATEGORY ---
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  parent      Category? @relation("CategoryParent", fields: [parentId], references: [id])
+  parentId    Int?
+  imageUrl    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subcategories Category[] @relation("CategoryParent")
+  animes        Anime[]    @relation("AnimeCategory")
+  translations  CategoryTranslation[]
+
+  @@index([slug])
+  @@index([parentId])
+  @@index([order])
+}
+
+// --- TAG ---
+model Tag {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  slug   String  @unique
+  animes Anime[] @relation("AnimeTags")
+
+  @@index([slug])
+}
+
+// --- ANIME GALLERY ---
+model AnimeGallery {
+  id          Int     @id @default(autoincrement())
+  anime       Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId     Int
+  imageUrl    String
+  description String?
+  order       Int     @default(0)
+
+  @@index([animeId])
+  @@index([order])
+}
+
+// --- EXTERNAL LINK ---
+model ExternalLink {
+  id      Int    @id @default(autoincrement())
+  anime   Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId Int
+  type    String
+  url     String
+
+  @@index([animeId])
+}
+
+// --- SOURCE ---
+model Source {
+  id      Int     @id @default(autoincrement())
+  anime   Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId Int
+  type    String
+  title   String
+  url     String?
+
+  @@index([animeId])
+}
+
+// --- RELATED ANIME ---
+model RelatedAnime {
+  id        Int    @id @default(autoincrement())
+  main      Anime  @relation("MainAnime", fields: [mainId], references: [id], onDelete: Cascade)
+  mainId    Int
+  related   Anime  @relation("RelatedAnime", fields: [relatedId], references: [id], onDelete: Cascade)
+  relatedId Int
+  relation  String
+
+  @@unique([mainId, relatedId])
+  @@index([mainId])
+  @@index([relatedId])
+}
+
+// --- SEASON ---
+model Season {
+  id           Int       @id @default(autoincrement())
+  anime        Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId      Int
+  name         String
+  slug         String
+  number       Int
+  releaseYear  Int?
+  episodeCount Int       @default(0)
+  viewCount    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  episodes Episode[]
+  comments Comment[]
+
+  @@unique([animeId, number])
+  @@index([animeId])
+  @@index([slug])
+}
+
+// --- EPISODE ---
+model Episode {
+  id          Int      @id @default(autoincrement())
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  seasonId    Int
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId     Int
+  title       String
+  slug        String
+  number      Int
+  description String?  @db.Text
+  releaseDate DateTime?
+  duration    Int?
+  thumbnail   String?
+  videoUrl    String?
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  comments Comment[]
+  views    View[]
+
+  @@unique([seasonId, number])
+  @@index([animeId])
+  @@index([slug])
+  @@index([releaseDate])
+}
+
+// --- CHARACTER ---
+model Character {
+  id          Int      @id @default(autoincrement())
+  anime       Anime?   @relation(fields: [animeId], references: [id], onDelete: SetNull)
+  animeId     Int?
+  name        String
+  description String?
+  imageUrl    String?
+  voiceActor  String?
+  role        String?
+  age         Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([animeId])
+  @@index([name])
+}
+
+// --- COMMENT ---
+model Comment {
+  id            Int           @id @default(autoincrement())
+  content       String        @db.Text
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
+  anime         Anime?        @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId       Int?
+  season        Season?       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  seasonId      Int?
+  episode       Episode?      @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId     Int?
+  parent        Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId      Int?
+  status        CommentStatus @default(PENDING)
+  likesCount    Int           @default(0)
+  dislikesCount Int           @default(0)
+  isEdited      Boolean       @default(false)
+  isSpoiler     Boolean       @default(false)
+  imageUrl      String?
+  gifUrl        String?
+  // Admin moderasyon alanları
+  moderatedAt   DateTime?
+  moderatedBy   User?         @relation("CommentModeratedBy", fields: [moderatedById], references: [id])
+  moderatedById Int?
+  moderationNote String?      @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  replies Comment[] @relation("CommentReplies")
+  reports Report[]
+
+  @@index([userId])
+  @@index([animeId])
+  @@index([seasonId])
+  @@index([episodeId])
+  @@index([parentId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([moderatedAt])
+}
+
+// --- FORUM ---
+model Forum {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String   // anime, manga, genel
+  isActive    Boolean  @default(true)
+  topicCount  Int      @default(0)
+  postCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   Int
+  moderators  Int[]
+  rules       String?  @db.Text
+  icon        String?
+  order       Int      @default(0)
+
+  topics ForumTopic[]
+  userRoles ForumUserRole[]
+  moderationQueue ModerationQueue[]
+  userActivities UserForumActivity[]
+
+  @@index([category])
+  @@index([isActive])
+  @@index([order])
+}
+
+model ForumCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  parent      ForumCategory? @relation("ForumCategoryParent", fields: [parentId], references: [id])
+  parentId    Int?
+  order       Int      @default(0)
+  topicCount  Int      @default(0)
+  postCount   Int      @default(0)
+  lastTopic   ForumTopic? @relation("CategoryLastTopic")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subcategories ForumCategory[] @relation("ForumCategoryParent")
+  topics        ForumTopic[]    @relation("CategoryTopics")
+
+  @@index([slug])
+  @@index([parentId])
+  @@index([order])
+}
+
+model ForumTopic {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  category    ForumCategory? @relation("CategoryTopics", fields: [categoryId], references: [id])
+  categoryId  Int?
+  forum       Forum?   @relation(fields: [forumId], references: [id])
+  forumId     String?
+  tags        String[]
+  status      TopicStatus @default(ACTIVE)
+  viewCount   Int      @default(0)
+  postCount   Int      @default(0)
+  isPinned    Boolean  @default(false)
+  isLocked    Boolean  @default(false)
+  isSticky    Boolean  @default(false)
+  lastReplyAt DateTime?
+  lastReplyBy String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts               ForumPost[]
+  categoryLastTopic   ForumCategory? @relation("CategoryLastTopic", fields: [categoryLastTopicId], references: [id])
+  categoryLastTopicId Int?           @unique
+  moderationQueue     ModerationQueue[]
+
+  @@index([slug])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([forumId])
+  @@index([status])
+  @@index([isPinned])
+  @@index([isSticky])
+  @@index([createdAt])
+  @@index([lastReplyAt])
+}
+
+model ForumPost {
+  id        Int      @id @default(autoincrement())
+  topic     ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topicId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  content   String   @db.Text
+  isEdited  Boolean  @default(false)
+  editedAt  DateTime?
+  editedBy  String?
+  parentReplyId Int?
+  likes     Int      @default(0)
+  dislikes  Int      @default(0)
+  status    ReplyStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports Report[]
+  moderationQueue ModerationQueue[]
+
+  @@index([topicId])
+  @@index([userId])
+  @@index([parentReplyId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Forum kullanıcı rolleri
+model ForumUserRole {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  forumId     String
+  role        String   // user, moderator, admin
+  permissions ForumPermission[]
+  grantedAt   DateTime @default(now())
+  grantedBy   String
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  forum Forum @relation(fields: [forumId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, forumId])
+  @@index([userId])
+  @@index([forumId])
+  @@index([role])
+}
+
+// Forum kullanıcı aktiviteleri
+model UserForumActivity {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  forumId     String
+  topicCount  Int      @default(0)
+  postCount   Int      @default(0)
+  lastActivity DateTime @default(now())
+  reputation  Int      @default(0)
+  isBanned    Boolean  @default(false)
+  banReason   String?
+  banExpiresAt DateTime?
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  forum Forum @relation(fields: [forumId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, forumId])
+  @@index([userId])
+  @@index([forumId])
+  @@index([lastActivity])
+}
+
+// Moderasyon kuyruğu
+model ModerationQueue {
+  id           Int      @id @default(autoincrement())
+  contentType  String   // topic, reply
+  contentId    Int
+  forumId      String?
+  reportedBy   Int[]
+  reason       String
+  status       String   @default("pending") // pending, reviewed, resolved
+  moderatorId  Int?
+  action       ModerationAction?
+  createdAt    DateTime @default(now())
+
+  forum   Forum?      @relation(fields: [forumId], references: [id])
+  topic   ForumTopic? @relation(fields: [topicId], references: [id])
+  topicId Int?
+  post    ForumPost?  @relation(fields: [postId], references: [id])
+  postId  Int?
+
+  @@index([contentType])
+  @@index([contentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// --- FAVORITE & WATCHLIST ---
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId   Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, animeId])
+  @@index([userId])
+  @@index([animeId])
+}
+
+model Watchlist {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId   Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, animeId])
+  @@index([userId])
+  @@index([animeId])
+}
+
+// --- RATING ---
+model Rating {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId   Int
+  value     Int      @db.SmallInt // 1-10 arası
+  review    String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, animeId])
+  @@index([animeId])
+  @@index([value])
+}
+
+// --- BADGE & TASK ---
+model Badge {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  type        BadgeType
+  description String?
+  iconUrl     String?
+  requirement Json?
+  createdAt   DateTime  @default(now())
+
+  userBadges UserBadge[]
+
+  @@index([type])
+}
+
+model UserBadge {
+  id       Int      @id @default(autoincrement())
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  badgeId  Int
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([earnedAt])
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  name        String
+  type        TaskType
+  description String?
+  reward      Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  userTasks UserTask[]
+
+  @@index([type])
+  @@index([isActive])
+}
+
+model UserTask {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  task        Task      @relation(fields: [taskId], references: [id])
+  taskId      Int
+  progress    Int       @default(0)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, taskId])
+  @@index([userId])
+  @@index([completedAt])
+}
+
+// --- VIEW & ACTIVITY ---
+model View {
+  id        Int      @id @default(autoincrement())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  anime     Anime?   @relation(fields: [animeId], references: [id])
+  animeId   Int?
+  episode   Episode? @relation(fields: [episodeId], references: [id])
+  episodeId Int?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([animeId])
+  @@index([episodeId])
+  @@index([createdAt])
+}
+
+model UserActivity {
+  id        Int          @id @default(autoincrement())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  type      ActivityType
+  refId     Int?
+  refType   String?
+  details   Json?
+  createdAt DateTime     @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// --- NOTIFICATION ---
+model Notification {
+  id         Int              @id @default(autoincrement())
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  title      String
+  message    String           @db.Text
+  type       NotificationType
+  sender     User?            @relation("NotificationSender", fields: [senderId], references: [id])
+  senderId   Int?
+  anime      Anime?           @relation(fields: [animeId], references: [id])
+  animeId    Int?
+  isRead     Boolean          @default(false)
+  link       String?
+  data       Json?
+  createdAt  DateTime         @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model NotificationSetting {
+  id      Int              @id @default(autoincrement())
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  type    NotificationType
+  enabled Boolean          @default(true)
+
+  @@unique([userId, type])
+}
+
+// --- REPORT ---
+model Report {
+  id           Int          @id @default(autoincrement())
+  type         ReportType
+  status       ReportStatus @default(PENDING)
+  reason       String
+  details      String?      @db.Text
+  reportedBy   User         @relation("ReportedBy", fields: [reportedById], references: [id])
+  reportedById Int
+  handledBy    User?        @relation("HandledBy", fields: [handledById], references: [id])
+  handledById  Int?
+  handledAt    DateTime?
+  createdAt    DateTime     @default(now())
+
+  // Reported content
+  anime     Anime?     @relation(fields: [animeId], references: [id])
+  animeId   Int?
+  comment   Comment?   @relation(fields: [commentId], references: [id])
+  commentId Int?
+  user      User?      @relation("ReportedUser", fields: [targetUserId], references: [id])
+  targetUserId Int?
+  forumPost ForumPost? @relation(fields: [forumPostId], references: [id])
+  forumPostId Int?
+
+  @@index([type])
+  @@index([status])
+  @@index([reportedById])
+  @@index([createdAt])
+}
+
+// --- BAN HISTORY ---
+model UserBanHistory {
+  id         Int       @id @default(autoincrement())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  reason     String
+  bannedBy   User      @relation("BannedBy", fields: [bannedById], references: [id])
+  bannedById Int
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// --- TRANSLATIONS ---
+model AnimeTranslation {
+  id          Int     @id @default(autoincrement())
+  anime       Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId     Int
+  language    String
+  title       String
+  description String? @db.Text
+
+  @@unique([animeId, language])
+  @@index([language])
+}
+
+model CategoryTranslation {
+  id          Int      @id @default(autoincrement())
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId  Int
+  language    String
+  name        String
+  description String?
+
+  @@unique([categoryId, language])
+  @@index([language])
+}
+
+// --- ANIME HISTORY ---
+model AnimeHistory {
+  id        Int      @id @default(autoincrement())
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  action    String
+  oldValues Json?
+  newValues Json?
+  createdAt DateTime @default(now())
+
+  @@index([animeId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
