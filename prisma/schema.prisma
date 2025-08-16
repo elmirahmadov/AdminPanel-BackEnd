@@ -222,6 +222,8 @@ model Anime {
   // Relations
   categories     Category[]        @relation("AnimeCategory")
   tags           Tag[]             @relation("AnimeTags")
+  period         Period?           @relation(fields: [periodId], references: [id])
+  periodId       Int?
   gallery        AnimeGallery[]
   externalLinks  ExternalLink[]
   sources        Source[]
@@ -878,4 +880,26 @@ model AnimeHistory {
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+}
+
+// --- PERIOD ---
+model Period {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  startYear   Int?
+  endYear     Int?
+  imageUrl    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  animes      Anime[]
+
+  @@index([slug])
+  @@index([startYear])
+  @@index([endYear])
+  @@index([order])
 }

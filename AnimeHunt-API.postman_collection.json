@@ -354,6 +354,181 @@
       ]
     },
     {
+      "name": "Period (Mevsim)",
+      "item": [
+        {
+          "name": "Tüm Dönemleri Getir",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/periods",
+              "host": ["{{baseUrl}}"],
+              "path": ["periods"]
+            }
+          }
+        },
+        {
+          "name": "Dönem Detay (ID ile)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/periods/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["periods", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Dönem Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "multipart/form-data" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/periods",
+              "host": ["{{baseUrl}}"],
+              "path": ["periods"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "İlkbahar 2024",
+                  "description": "Dönem adı (gerekli)"
+                },
+                {
+                  "key": "slug",
+                  "value": "ilkbahar-2024",
+                  "description": "Slug (gerekli, benzersiz)"
+                },
+                {
+                  "key": "description",
+                  "value": "2024 İlkbahar anime sezonu",
+                  "description": "Açıklama (opsiyonel)"
+                },
+                {
+                  "key": "startYear",
+                  "value": "2024",
+                  "description": "Başlangıç yılı (opsiyonel)"
+                },
+                {
+                  "key": "endYear",
+                  "value": "",
+                  "description": "Bitiş yılı (opsiyonel)"
+                },
+                {
+                  "key": "order",
+                  "value": "1",
+                  "description": "Sıralama (opsiyonel)"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Dönem görseli (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dönem Güncelle (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "multipart/form-data" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/periods/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["periods", ":id"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "İlkbahar 2024 (Güncellenmiş)",
+                  "description": "Dönem adı (gerekli)"
+                },
+                {
+                  "key": "slug",
+                  "value": "ilkbahar-2024-guncellenmis",
+                  "description": "Slug (gerekli, benzersiz)"
+                },
+                {
+                  "key": "description",
+                  "value": "2024 İlkbahar anime sezonu - güncellenmiş",
+                  "description": "Açıklama (opsiyonel)"
+                },
+                {
+                  "key": "startYear",
+                  "value": "2024",
+                  "description": "Başlangıç yılı (opsiyonel)"
+                },
+                {
+                  "key": "endYear",
+                  "value": "",
+                  "description": "Bitiş yılı (opsiyonel)"
+                },
+                {
+                  "key": "order",
+                  "value": "1",
+                  "description": "Sıralama (opsiyonel)"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Dönem görseli (opsiyonel)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dönem Sil (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/periods/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["periods", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Döneme Anime Ekle (Moderator)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/periods/:id/animes/:animeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["periods", ":id", "animes", ":animeId"]
+            }
+          }
+        },
+        {
+          "name": "Dönemden Anime Çıkar (Moderator)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/periods/:id/animes/:animeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["periods", ":id", "animes", ":animeId"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Forum",
       "item": [
         {

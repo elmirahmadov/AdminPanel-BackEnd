@@ -126,26 +126,3 @@ export async function checkFavorite(req: Request, res: Response) {
     });
   }
 }
-
-// Favori istatistikleri
-export async function getFavoriteStats(req: Request, res: Response) {
-  const { userId } = req.params;
-  try {
-    const animeCount = await prisma.favorite.count({
-      where: {
-        userId: Number(userId),
-        // schema gereği animeId zorunlu olduğundan doğrudan sayılabilir
-      },
-    });
-
-    res.json({
-      totalFavorites: animeCount,
-      animeFavorites: animeCount,
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: "Favori istatistikleri getirilemedi.",
-      detail: err instanceof Error ? err.message : err,
-    });
-  }
-}
