@@ -15,6 +15,7 @@ import forumRouter from "./modules/Anime/routes/forum";
 import badgeRouter from "./modules/Anime/routes/badge";
 import taskRouter from "./modules/Anime/routes/task";
 import notificationRouter from "./modules/Anime/routes/notification";
+import periodRouter from "./modules/Period/routes/period";
 import { errorHandler } from "./common/middlewares/errorHandler";
 import rateLimit from "express-rate-limit";
 import logger from "./common/utils/logger";
@@ -74,6 +75,7 @@ app.use("/api/forums", forumRouter);
 app.use("/api/badge", badgeRouter);
 app.use("/api/task", taskRouter);
 app.use("/api/notification", notificationRouter);
+app.use("/api/periods", periodRouter);
 app.use(errorHandler);
 
 app.get("/health", (req: Request, res: Response) => {

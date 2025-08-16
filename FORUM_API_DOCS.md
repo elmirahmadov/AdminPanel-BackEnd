@@ -1,3 +1,13 @@
+# Anime Hunt API Dokümantasyonu
+
+## Genel Bilgiler
+
+- **Base URL**: `http://localhost:5000/api`
+- **Authentication**: JWT token gerekli (Authorization header)
+- **Content-Type**: `application/json`
+
+---
+
 # Forum Sistemi API Dokümantasyonu
 
 ## Genel Bilgiler
@@ -53,6 +63,133 @@ DELETE /api/forums/admin/categories/:id     # Kategori sil
 ```http
 DELETE /api/forums/admin/topics/:id         # Konu sil (Moderatör)
 DELETE /api/forums/admin/posts/:id          # Yanıt sil (Moderatör)
+```
+
+---
+
+# Period (Mevsim) API Dokümantasyonu
+
+## Genel Bilgiler
+
+- **Base URL**: `http://localhost:5000/api/periods`
+- **Authentication**: JWT token gerekli (Admin/Moderator işlemleri için)
+- **Content-Type**: `application/json`
+
+## 📋 Period Endpoints
+
+### Tüm Dönemleri Listele
+
+```http
+GET /api/periods
+```
+
+**Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "İlkbahar 2024",
+    "slug": "ilkbahar-2024",
+    "description": "2024 İlkbahar anime sezonu",
+    "startYear": 2024,
+    "endYear": null,
+    "imageUrl": "spring-2024.jpg",
+    "order": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "animeCount": 45,
+    "episodeCount": 540
+  }
+]
+```
+
+### Belirli Dönemi Getir
+
+```http
+GET /api/periods/:id
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "name": "İlkbahar 2024",
+  "slug": "ilkbahar-2024",
+  "description": "2024 İlkbahar anime sezonu",
+  "startYear": 2024,
+  "endYear": null,
+  "imageUrl": "spring-2024.jpg",
+  "order": 1,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "animes": [
+    {
+      "id": 1,
+      "title": "Anime Adı",
+      "categories": [...],
+      "episodes": [...],
+      "seasons": [...]
+    }
+  ],
+  "animeCount": 45,
+  "episodeCount": 540
+}
+```
+
+### Yeni Dönem Oluştur (Admin)
+
+```http
+POST /api/periods
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+```
+
+**Request Body:**
+
+```json
+{
+  "name": "Yaz 2024",
+  "slug": "yaz-2024",
+  "description": "2024 Yaz anime sezonu",
+  "startYear": 2024,
+  "endYear": null,
+  "order": 2
+}
+```
+
+**File Upload:**
+
+- `image`: Dönem görseli (opsiyonel)
+
+### Dönem Güncelle (Admin)
+
+```http
+PUT /api/periods/:id
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+```
+
+### Dönem Sil (Admin)
+
+```http
+DELETE /api/periods/:id
+Authorization: Bearer <token>
+```
+
+### Döneme Anime Ekle (Moderator)
+
+```http
+POST /api/periods/:id/animes/:animeId
+Authorization: Bearer <token>
+```
+
+### Dönemden Anime Çıkar (Moderator)
+
+```http
+DELETE /api/periods/:id/animes/:animeId
+Authorization: Bearer <token>
 ```
 
 ---
